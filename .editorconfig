@@ -1,0 +1,8 @@
+[*.{fs,fsx,fsi}]
+max_line_length = 80
+fsharp_space_before_class_constructor = true
+fsharp_max_dot_get_expression_width = 80
+fsharp_multiline_bracket_style = aligned
+# cramped | aligned | stroustrup
+fsharp_multi_line_lambda_closing_newline = true
+fsharp_newline_before_multiline_computation_expression = true
