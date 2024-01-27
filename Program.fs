@@ -8,38 +8,37 @@ module Flags =
     type MoveOption = int
 
     [<Literal>]
-    let NotDisplayDialogBox: MoveOption = 2 <<< 1
+    let NotDisplayDialogBox: MoveOption = 4
 
     [<Literal>]
-    let AutoRename: MoveOption = 2 <<< 3
+    let AutoRename: MoveOption = 8
 
     [<Literal>]
-    let RespondYesToAll: MoveOption = 2 <<< 4
+    let RespondYesToAll: MoveOption = 16
 
     [<Literal>]
-    let PreserveUndo: MoveOption = 2 <<< 4
+    let PreserveUndo: MoveOption = 64
 
     [<Literal>]
-    let ExpandWildCard: MoveOption = 2 <<< 5
+    let ExpandWildCard: MoveOption = 128
 
     [<Literal>]
-    let NotShowFileNameOnDialogBox: MoveOption = 2 <<< 6
+    let NotShowFileNameOnDialogBox: MoveOption = 256
 
     [<Literal>]
-    let NotConfirmToCreateNewDirectory: MoveOption = 2 <<< 7
+    let NotConfirmToCreateNewDirectory: MoveOption = 512
 
     [<Literal>]
-    let NotCopySecurityAttributes: MoveOption = 2 <<< 8
+    let NotCopySecurityAttributes: MoveOption = 1024
 
     [<Literal>]
-    let NotOperateRecursively: MoveOption = 2 <<< 9
+    let NotOperateRecursively: MoveOption = 2048
 
     [<Literal>]
-    let NotMoveConnectedFilesAsAGroup: MoveOption = 2 <<< 10
+    let NotMoveConnectedFilesAsAGroup: MoveOption = 4096
 
-type Explorer () =
-    let shell =
-        Activator.CreateInstance <| Type.GetTypeFromProgID "Shell.Application"
+type Explorer() =
+    let shell = Activator.CreateInstance <| Type.GetTypeFromProgID "Shell.Application"
 
     let recyclebin =
         shell
@@ -56,36 +55,35 @@ type Explorer () =
         shell
             .GetType()
             .InvokeMember(
-                "Namespace",
-                BindingFlags.InvokeMethod,
-                null,
-                recyclebin,
-                [| box path; box <| (options |> List.fold (+) 0) |]
+                name = "MoveHere",
+                invokeAttr = BindingFlags.InvokeMethod,
+                binder = null,
+                target = recyclebin,
+                args = [| box path; box <| (options |> List.fold (+) 0) |]
             )
         |> ignore
 
     interface IDisposable with
         member self.Dispose() =
-            Marshal.ReleaseComObject <| shell |> ignore
+            Marshal.ReleaseComObject shell |> ignore
             // Not required?
             GC.SuppressFinalize self
-
 
 [<EntryPoint>]
 let main (argv: string array) : int =
     let fullPathes =
         argv |> Array.skip 1 |> Array.map (fun arg -> IO.Path.GetFullPath arg)
 
-    let opts = [ Flags.NotConfirmToCreateNewDirectory; Flags.ExpandWildCard ]
+    let opts = [ Flags.ExpandWildCard ]
 
-    use explorer = new Explorer()
+    try
+        use explorer = new Explorer()
 
-    fullPathes
-    |> Array.iter (fun path ->
-        try
-            explorer.MoveToRecycleBin(path, opts)
-        with ex ->
-            eprintfn "%s" ex.Message
-    )
+        fullPathes
+        |> Array.iter (fun path ->
+            printfn "Moving to $Recycle.bin: %s" path
+            explorer.MoveToRecycleBin(path, opts))
+    with ex ->
+        eprintfn "Error: %s" ex.Message
 
     0

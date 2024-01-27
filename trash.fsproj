@@ -2,7 +2,23 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <Optimize>true</Optimize>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishSingleFile>true</PublishSingleFile>
+    <!-- <PublishTrimmed>true</PublishTrimmed> -->
+    <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
+    <PublishReadyToRunDelaySign>true</PublishReadyToRunDelaySign>
+
+    <UseWindowsForms>true</UseWindowsForms>
+
+    <!-- Add the following LinkerSwitches to enable COM functionality -->
+    <LinkerSwitches>--feature com</LinkerSwitches>
+    <PreserveComReferences>true</PreserveComReferences>
+
+    <IlcGenerateComWrappers>true</IlcGenerateComWrappers>
+    <LinkerKeepAppCode>true</LinkerKeepAppCode>
   </PropertyGroup>
 
   <ItemGroup>
